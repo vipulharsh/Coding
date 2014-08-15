@@ -1,0 +1,18 @@
+#include <iostream>
+#include <list>
+
+
+using namespace std;
+
+int main(){
+
+   int N;
+   cin>>N;
+   
+   list<int> A;
+   
+   for(int i=0;i<N;i++)
+     A.push_back(i+2);
+
+
+}

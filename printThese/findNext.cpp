@@ -1,0 +1,130 @@
+#include <iostream>
+#include <assert.h>
+using namespace std;
+
+
+struct treeNode{
+	int l,r;	
+	int val;
+	
+}; 
+
+
+
+//integer segment trees
+class segment_tree{
+public:
+	int size;
+	treeNode A[200000];
+	
+
+
+void initialize_helper(int node , int i  ,int j , int *in){
+	if(i==j) {
+		 A[node].val = in[i];
+		 A[node].l = (A[node].r = i); 
+		 return;
+	}
+	
+	initialize_helper(2 * node + 1 , i , (i+j-1)/2 , in);
+	initialize_helper(2 * node + 2 , (i+j-1)/2 + 1 , j , in);
+		
+	A[node].val = max(A[2*node +1].val , A[2*node + 2].val); 
+	A[node].l = i;
+	A[node].r = j;  
+}
+
+     
+ void initialize(int size_ , int *in){
+	 size = size_;
+	 initialize_helper(0 , 0 , size-1 , in); 	 	 
+}	  
+  	   
+
+
+
+int maxRange(int i , int j , int node){
+	
+	if(A[node].l == A[node].r){
+	
+		assert((A[node].l == i) && (A[node].r == j));
+		
+		if((A[node].l == i) && (A[node].r == j)) return A[node].val;
+ 	
+ 	}
+  	
+	else
+	
+       assert(A[2*node + 2].l == A[2*node + 1].r + 1);  	 
+	
+	   return max( maxRange(i , A[2*node + 1].r , 2*node+1) , maxRange(A[2*node + 2].l , j , 2*node + 2));	
+}	 
+
+	
+	
+	
+void printTree(int node , int spaces){
+
+	for(int i=0;i<spaces;i++)
+	    cout<<" ";
+	cout<<A[node].val<<endl;
+	
+	if(A[node].l != A[node].r){
+		printTree(node*2 + 1, spaces + 2);
+		printTree(node*2 + 2, spaces + 2);    	
+	}	
+}	
+
+
+int findNext(int val, int node){
+	
+	if(A[node].val < val) return -1;
+	
+	
+	if(A[node].l == A[node].r){
+		assert(A[node].val >= val);
+		A[node].val = A[node].val - val;
+		int curr = (node + 1)/2 -1;
+		while(curr >=0){
+			A[curr].val = max(A[2*curr + 1].val , A[2*curr + 2].val);
+			curr = (curr + 1)/2 -1;		
+		}
+		return A[node].l;
+	}
+	
+	if (A[2 * node + 1].val >= val) return  findNext(val , node*2 + 1);
+	 
+	assert(A[2 * node + 2].val >= val);
+	 return findNext(val , node*2 + 2);
+		
+}
+};
+
+
+
+
+
+int main(){
+	
+	segment_tree maxtree;
+	int in[100000];
+	int N;
+	cin>>N;
+	for(int i=0;i<N;i++)
+	     cin>>in[i];
+	
+	maxtree.initialize(N , in);
+	maxtree.printTree(0 ,0);
+	cout<<"-------------------"<<endl;
+	
+	int nQueries;
+	cin>>nQueries;
+	int temp;
+	for(int i=0;i<nQueries;i++){
+	  cin>>temp;
+	  maxtree.findNext(temp , 0);
+	  maxtree.printTree(0,0);
+	  cout<<"---------------------------"<<endl;
+	}	
+  return 0;
+}
